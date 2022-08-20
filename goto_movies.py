@@ -1,7 +1,7 @@
 """Companion code to https://realpython.com/simulation-with-simpy/
 'Simulating Real-World Processes With SimPy'
-Python version: 3.7.3
-SimPy version: 3.0.11
+Python version: 3.9
+SimPy version: 4.0.1
 """
 
 import simpy
