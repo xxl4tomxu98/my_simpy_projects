@@ -13,6 +13,9 @@ from simulation.siouxfalls import SiouxFalls
 
 plt.style.use('ggplot')
 
+def f(x):
+    return int(x)
+
 
 def main():
     #################################
@@ -76,14 +79,14 @@ def main():
 
     # draw initial network
     for i in sim.networkLines:
-        cv2.line(sim.img, i[0], i[1], (255, 255, 255), 3)
+        cv2.line(sim.img, (int(i[0][0]), int(i[0][1])), (int(i[1][0]), int(i[1][1])), (255, 255, 255), 2)
 
     for linkid in sim.network.links:
         loc = (0.25 * np.asarray(sim.network.links[linkid]['coordinates'][1]) +
                0.75 * np.asarray(sim.network.links[linkid]['coordinates'][0]))
-
-        cv2.putText(sim.img, str(linkid), tuple(loc),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255))
+        f2 = np.vectorize(f)
+        cv2.putText(sim.img, str(linkid), tuple(f2(loc)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
     name = 'Sioux Falls Network'
     cv2.imshow(name, sim.img)
@@ -127,12 +130,10 @@ def main():
 
     # links statistics
     stats.meanQueueLength(plt, df)
-
     plt.figure(2)
 
     for link in sim.network.links.keys():
         df2 = df.loc[(df['link'] == link) & (df['event'] != 'entry')]
-
         if df2.empty is False and df2['t_queue'].sum() > 0.:
             plt.plot(df2[['time']], df2[['queue']], label='link %s' % link)
 

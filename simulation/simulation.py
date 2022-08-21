@@ -57,47 +57,35 @@ class Simulation(object):
 
     def car(self, carID, t_arrival, node, turn_ratio, linkid):
         """ car generator """
-
         # prepare variables
         t_entry, t_travel = t_arrival
         queue = self.network.links[linkid]['queue']
-
         # en-route
         yield self.env.timeout(t_travel)
-
         # put 1 car in link queue
         yield queue.put(1)
-
         # update queue length for visualization
         self.updateQueue(queue, linkid)
-
         # query queue length
         with node.request() as req:
             q_length = queue.level
-
             # data logging
             print('car %d arrived on link %s at %.2fs (Q=%d cars) ' % (carID, linkid, sum(t_arrival), q_length))
             self.data.append((carID, linkid, 'arrival', sum(t_arrival), q_length))
-
             # wait until queue is ready
             result = yield req
             t_service = exponential(self.network.links[linkid]['MU'])
-
             # query traffic lights if available
             if node in self.network.trafficLights:
                 tg = self.network.trafficLights[node]
-
                 # yield to traffic light 'stop'
                 with tg.stop.request(priority=0) as stop:
                     yield stop
-
             # services at junction
             yield self.env.timeout(t_service)
-
             # time spent in queue
             t_depart = self.env.now
             t_queue = t_depart - sum(t_arrival)
-
             # recursions (move 'car' into next link with probability prob)
             prob = list(turn_ratio.values())
             egress = list(turn_ratio.keys())[np.argmax(multinomial(1, prob))]
@@ -110,7 +98,6 @@ class Simulation(object):
                     linkid=egress
                 )
                 self.cars[carID].append(egress) # keep track of history
-
                 self.env.process(c)
 
             # keep track of the number of cars in the system
@@ -119,17 +106,13 @@ class Simulation(object):
 
         # release 1 car from queue
         yield queue.get(1)
-
         # update queue length for visualization
         self.updateQueue(queue, linkid)
-
         # update queue level
         q_length = queue.level
-
         # data logging
         print('car %d departed link %s at %.2fs (Q=%d cars)' % (carID, linkid, t_depart, q_length))
         self.data.append((carID, linkid, 'departure',  t_depart, q_length, t_queue))
-
         # prints car travel history
         print('car %d history: %s' % (carID, self.cars[carID]))
 
