@@ -34,7 +34,7 @@ class MachineClass(object):
             self.StartUpTime = env.now()
             # hold for exponentially distributed up time
             UpTime = G.Rnd.expovariate(MachineClass.UpRate)
-            yield SimPy.Environment.hold, self, UpTime # simulate UpTime
+            yield env.hold, self, UpTime # simulate UpTime
             # update up time total
             MachineClass.TotalUpTime += env.now() - self.StartUpTime
             RepairTime = G.Rnd.expovariate(MachineClass.RepairRate)
@@ -49,10 +49,10 @@ def main():
         # create a MachineClass object
         M = MachineClass(env)
         # register thread M, executing M’s Run() method,
-        env.activate(M, M.Run())  # required
+        env.process(M.Run(env))  # required
     # run until simulated time 10000
     MaxSimtime = 10000.0
-    simpy.Environment.simulate(until=MaxSimtime)  # required
+    env.run(until=MaxSimtime)  # required
     print("the percentage of up time was: ", MachineClass.TotalUpTime/(2*MaxSimtime))
 
 

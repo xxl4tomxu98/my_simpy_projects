@@ -25,29 +25,23 @@ class Bootstrap(object):
     def processSimulation(self):
         # initialize Sioux Falls network
         siouxfalls = SiouxFalls(0.0025)
-
         # create Sioux Fall network by enumerating across all links
         for linkid, t0 in enumerate(siouxfalls.t0):
-
             # calculate length of link with sqrt((x1 - x2)^2 + (y1 - y2)^2)
             length = np.sqrt(
                 np.power(siouxfalls.x1[linkid] - siouxfalls.x2[linkid], 2)
               + np.power(siouxfalls.y1[linkid] - siouxfalls.y2[linkid], 2)) / 600.
             mu = siouxfalls.mu[linkid]
-
             # assign nodeID to each link if check pass in node list
             for i, node in enumerate(siouxfalls.nodes):
                 if linkid+1 in node:
                     nodeID = i
-
             # assign turn ratio to each link
             turns = {}
             for j, turn in enumerate(siouxfalls.turns[linkid]):
                 turns[j + 1] = turn
-
             # assign exit probability from last item in turn list ([-1])
             turns['exit'] = turns.pop(list(turns.keys())[-1])
-
             # generate coordinates of each link (for visualization)
             pt1 = (np.float32(siouxfalls.x1[linkid] / 600.),
                    np.float32(siouxfalls.y1[linkid] / 600.))
@@ -56,10 +50,8 @@ class Bootstrap(object):
                    np.float32(siouxfalls.y2[linkid] / 600.))
 
             c = (pt1, pt2)
-
             # draw link on map
             self.sim.networkLines.append(c)
-
             # add link to sim.network
             self.sim.network.addLink(linkID=linkid+1, turns=turns,
                                 type='link',  length=length,
