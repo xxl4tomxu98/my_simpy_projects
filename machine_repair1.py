@@ -29,7 +29,7 @@ class MachineClass(object):
         MachineClass.NextID += 1
 
     def Run(self, env): # required constructor
-        while 1:
+        while True:
             # record current time, now(), so can see how long machine is up
             self.StartUpTime = env.now()
             # hold for exponentially distributed up time
