@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import simpy, cv2, sys, os
-
+from simulation.simulation import Simulation
 from simulation import *
 from statistics import *
 
@@ -32,7 +32,7 @@ def road():
 
     # draw initial network
     for i in sim.networkLines:
-        cv2.line(sim.img, i[0], i[1], (255,255,255), 3)
+        cv2.line(sim.img, (int(i[0][0]), int(i[0][1])), (int(i[1][0]), int(i[1][1])), (255, 255, 255), 3)
     name = 'Single Road'
     cv2.imshow(name, sim.img)
 
