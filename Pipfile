@@ -10,6 +10,7 @@ scipy = "*"
 matplotlib = "*"
 opencv-python = "*"
 pandas = "*"
+plotly = "*"
 
 [dev-packages]
 
