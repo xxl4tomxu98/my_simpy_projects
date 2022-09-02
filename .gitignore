@@ -151,7 +151,6 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-
-.vscode
+.DS_Store
 visualize.js.map
 output/events.json
