@@ -11,6 +11,7 @@ matplotlib = "*"
 opencv-python = "*"
 pandas = "*"
 plotly = "*"
+seaborn = "*"
 
 [dev-packages]
 
