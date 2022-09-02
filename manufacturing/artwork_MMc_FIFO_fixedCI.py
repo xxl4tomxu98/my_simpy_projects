@@ -159,7 +159,7 @@ def print_output():
                  fontsize=18, y= 0.8 , pad = 4)
     runs_table.auto_set_font_size(False)
     runs_table.set_fontsize(8)
-    plt.savefig('./' +'twoWKs_perf_measures.png',
+    plt.savefig('./' +'twoWKs_perf_measures_fixedCI.png',
                 bbox_inches='tight', dpi=150)
     plt.show()
 #.....................................................
@@ -189,7 +189,7 @@ def print_output():
     ax.set_title("Output Data", fontsize=18, y= 0.8 , pad = 4)
     output_table.auto_set_font_size(False)
     output_table.set_fontsize(8)
-    plt.savefig(your_path +'twoWKs_output_perf_measures.png',
+    plt.savefig('./' +'twoWKs_output_perf_measures_fixedCI.png',
                 bbox_inches='tight', dpi=150)
     plt.show()
 
