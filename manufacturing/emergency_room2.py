@@ -1,6 +1,7 @@
 # Emergency Room Simulation Model
 # Non Terminating Simulation
 # Batch Means Technique
+# Determining the warm-up period
 # Import Modules
 import pandas as pd
 import numpy  as np
@@ -9,6 +10,7 @@ import simpy
 from scipy import stats
 from scipy.stats import uniform
 from scipy.stats import truncnorm
+import matplotlib.pyplot as plt
 
 # initialization module
 # Unit of time = hours
@@ -16,9 +18,9 @@ PATIENT_ARRIVAL_RATE  = 1.2
 NUMBER_ADMISSIONS_DESKS = 2
 ADMISSION_MEAN = 0.3
 ADMISSION_STD  = 0.15
-HOSPITAL_MEAN = 25
+HOSPITAL_MEAN = 15
 HOSPITAL_STD  = 1.5
-AMBULATORY_MEAN = 6
+AMBULATORY_MEAN = 4
 AMBULATORY_STD  = 1
 NO_CARE_INF = 0.5
 NO_CARE_SUP = 1.0
@@ -28,22 +30,21 @@ NUMBER_DOCS_NO_CARE = 1
 # discrete probabilities for three care levels
 prob1, prob2, prob3 = 0.3, 0.6, 0.1
 prob1 = round(prob1, 2)
-prob2 = round(prob1 + prob2, 2)
-prob3 = round(prob2 + prob3, 2)
+prob2 = round(prob1 + prob2,2)
+prob3 = round(prob2 + prob3,2)
 list_of_probs = [prob1, prob2, prob3]
-patient_arrival, arrival = [], []
-patient_admission, patient_hospital_care = [], []
-patient_ambulatory_care, patient_no_care = [], []
-time_in_admission, delay_in_admission = [], []
-time_in_hospital_care, delay_in_hospital_care = [], []
-time_in_ambulatory_care, delay_in_ambulatory_care = [], []
-time_in_no_care, delay_in_no_care = [], []
-SIM_TIME = 8760
+listoflists = []
+SIM_TIME = 24 * 365 * 6        # 24 hours * 365 days * 6 years
+
+prng = RandomState(5678)
+stop_arrivals = 15000
+l_warm_up = True
+my_path = './'
 
 
-def generate_patient(env, patient_arrival_rate,inital_delay = 0,                 
-                     stoptime = simpy.core.Infinity,
-                     prng = RandomState(0)):
+def generate_patient(env, patient_arrival_rate,inital_delay=0,                 
+                     stoptime=simpy.core.Infinity,
+                     prng=RandomState(0)):
     number_of_patients = 0
     yield env.timeout(inital_delay)     # Initial delay 
     while (env.now <stoptime):  
@@ -146,58 +147,80 @@ def patient_stream(env, patient_number, los_admis,
         no_care_level.release(no_care_request)
 
 
-def calc_batches():
-    ## delay in ambulatory care
-    global inf, sup, delay_in_ambulatory_care
-    number_batchs = 12        # selected by the analyst
-    number_recs    = len(delay_in_ambulatory_care)
+def warm_up_period():
+    df = pd.DataFrame([list(x) for x in zip(*listoflists)])
+    df['mean']   = df.mean(axis = 1)
+    df['cumavg'] = df['mean'].expanding().mean()
+    plt.plot(df.index.values,df['cumavg'])
+    plt.xlabel("Patient")
+    plt.ylabel("Cum. Avg.")
+    plt.savefig(my_path + 'warm_up_period.png')
+    plt.show()
+
+
+def batch_means():
+    # eliminating the warm-up period
+    delay_in_ambulatory_care = delay_in_ambulatory_care[1000: ]
+    number_batchs = 20        ## selected by the analyst
+    number_recs = len(delay_in_ambulatory_care)
     recs_per_batch = int(number_recs/number_batchs)
-    # to guarantee equal number of records in each batch
+    # to garantee equal number of records in each batch
     matrix_dim = number_batchs*recs_per_batch
-    rows_to_eliminate = number_recs - matrix_dim   
-    delay_in_ambulatory_care = delay_in_ambulatory_care[rows_to_eliminate:]
-    # eliminating transient effects (warm-up period)
-    delay_in_ambulatory_care = delay_in_ambulatory_care[recs_per_batch:]
+    rows_to_eliminate = number_recs - matrix_dim
+    delay_in_ambulatory_care = delay_in_ambulatory_care[rows_to_eliminate: ]
     matrix = []
     while delay_in_ambulatory_care != []:
         matrix.append(delay_in_ambulatory_care[:recs_per_batch])
-        delay_in_ambulatory_care = delay_in_ambulatory_care[recs_per_batch:]   
-    number_batchs = number_batchs - 1   # the warm-up batch                                         
+        delay_in_ambulatory_care = delay_in_ambulatory_care[recs_per_batch:]
+    ## Calculating and printing the average delay in ambulatory care
     dof  = number_batchs - 1
-    confidence = 0.90                   # selected by the analyst
-    t_crit = np.abs(stats.t.ppf((1-confidence)/2,dof))
+    confidence = 0.90            # selected by the analyst
+    t_crit = np.abs(stats.t.ppf((1-confidence)/2, dof))
     batch_means = np.mean(matrix, axis = 1)
-    batch_std   = np.std(matrix,  axis = 1)
     average_batch_means  = np.mean(batch_means,axis = 0)
     standard_batch_means = np.std(batch_means, axis = 0)
-    inf = average_batch_means - \
-          standard_batch_means*t_crit/np.sqrt(number_batchs)
-    sup = average_batch_means + \
-          standard_batch_means*t_crit/np.sqrt(number_batchs)
+    inf = average_batch_means - standard_batch_means*t_crit/np.sqrt(number_batchs)
+    sup = average_batch_means + standard_batch_means*t_crit/np.sqrt(number_batchs)
     inf = round(float(inf),2)
     sup = round(float(sup),2)
     print('')
     print('Simulation of an Emergency Room')
     print('')
-    print('%3s patients arrived at the emergency room' % (len(patient_arrival)))
+    print('Run %2s'% (run+1))
+    print('%3s patients arrived to the emergency room' % (len(patient_arrival)))
     print('%3s patients derived to ambulatory care' % (number_recs))
     print('%3s batches of %3s records were used for calculations' % (number_batchs, recs_per_batch))
     print ('')
-    print('The average delay in ambulatory care belongs to the interval %3s %3s' % (inf, sup))
+    print(' The average delay in ambulatory care is %3s ' % (average_batch_means))
+    print ('')
+    print('The average delay in ambulatory care belongs to the interval  %3s %3s' % (inf, sup))
 
 
-env = simpy.Environment()
-admission_desks = simpy.Resource(env,
-                                 capacity = NUMBER_ADMISSIONS_DESKS)
-hospital_care   = simpy.Resource(env, 
-                                 capacity = NUMBER_DOCS_HOSPITAL)
-ambulatory_care = simpy.Resource(env, 
-                                 capacity = NUMBER_DOCS_AMBULAT)
-no_care_level   = simpy.Resource(env, 
-                                 capacity = NUMBER_DOCS_NO_CARE)
-prng = RandomState(1234)
-stop_arrivals = 2000
-env.process(generate_patient(env,PATIENT_ARRIVAL_RATE, 0,
-            stop_arrivals, prng ))
-env.run(until = SIM_TIME)
-calc_batches()
+if l_warm_up:
+    number_of_runs = 10
+else:
+    number_of_runs = 1
+
+for run in range(number_of_runs):
+    patient_arrival, arrival = [], []
+    patient_admission, patient_hospital_care = [], []   
+    patient_ambulatory_care, patient_no_care = [], [] 
+    time_in_admission, delay_in_admission = [],[]   
+    time_in_hospital_care,delay_in_hospital_care = [],[]
+    time_in_ambulatory_care, delay_in_ambulatory_care = [],[]
+    time_in_no_care, delay_in_no_care = [], []
+    env = simpy.Environment()
+    admission_desks = simpy.Resource(env, capacity=NUMBER_ADMISSIONS_DESKS)  
+    hospital_care = simpy.Resource(env, capacity=NUMBER_DOCS_HOSPITAL)
+    ambulatory_care = simpy.Resource(env, capacity=NUMBER_DOCS_AMBULAT)
+    no_care_level = simpy.Resource(env, capacity=NUMBER_DOCS_NO_CARE)
+    env.process(generate_patient(env, PATIENT_ARRIVAL_RATE,0,stop_arrivals, prng ))
+    env.run(until = SIM_TIME)
+    listoflists.append(delay_in_ambulatory_care)
+
+if l_warm_up:
+    warm_up_period()
+else:
+    batch_means()
+
+
