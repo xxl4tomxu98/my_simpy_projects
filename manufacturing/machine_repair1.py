@@ -28,7 +28,7 @@ class MachineClass(object):
         self.ID = MachineClass.NextID # ID for this MachineClass object
         MachineClass.NextID += 1
 
-    def Run(self, env): # required constructor
+    def model_run(self, env): # required constructor
         while True:
             # record current time, now(), so can see how long machine is up
             self.StartUpTime = env.now()
@@ -47,13 +47,13 @@ def main():
     # set up the two machine threads
     for I in range(2):
         # create a MachineClass object
-        M = MachineClass(env)
-        # register thread M, executing M’s Run() method,
-        env.process(M.Run(env))  # required
+        machine = MachineClass(env)
+        # register thread machine, executing machine’s model_run() method,
+        env.process(machine.model_run(env))  # required
     # run until simulated time 10000
     MaxSimtime = 10000.0
     env.run(until=MaxSimtime)  # required
-    print("the percentage of up time was: ", MachineClass.TotalUpTime/(2*MaxSimtime))
+    print("the percentage of up time was: ", (MachineClass.TotalUpTime)/(2*MaxSimtime))
 
 
 if __name__ == "__main__":

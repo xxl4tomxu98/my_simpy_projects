@@ -65,3 +65,4 @@ class Philosoper():
             print("P{} {} @{}", self.id, message, self.env.now())  
 
 philosophers = [Philosoper(env, (chopsticks[i], chopsticks[(i+1)%N]), i) for i in range(N)]
+env.run()
