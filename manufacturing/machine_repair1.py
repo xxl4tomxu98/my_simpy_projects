@@ -24,22 +24,23 @@ class MachineClass(object):
     def __init__(self, env): # required constructor
         env.process.__init__(self) # must call parent constructor
         # instance variables
+        self.env = env
         self.StartUpTime = 0.0 # time the current up period started
         self.ID = MachineClass.NextID # ID for this MachineClass object
         MachineClass.NextID += 1
 
-    def model_run(self, env): # required constructor
+    def model_run(self): # required constructor
         while True:
             # record current time, now(), so can see how long machine is up
-            self.StartUpTime = env.now()
+            self.StartUpTime = self.env.now
             # hold for exponentially distributed up time
             UpTime = G.Rnd.expovariate(MachineClass.UpRate)
-            yield env.hold, self, UpTime # simulate UpTime
+            yield self.env.timeout(UpTime) # simulate UpTime
             # update up time total
-            MachineClass.TotalUpTime += env.now() - self.StartUpTime
+            MachineClass.TotalUpTime += self.env.now - self.StartUpTime
             RepairTime = G.Rnd.expovariate(MachineClass.RepairRate)
-            # hold for exponentially distributed repair time
-            yield env.hold, self, RepairTime
+            # hold for exponentiallydistributed repair ime
+            yield self.env.timeout(RepairTime)
 
 
 def main():
@@ -49,7 +50,7 @@ def main():
         # create a MachineClass object
         machine = MachineClass(env)
         # register thread machine, executing machine’s model_run() method,
-        env.process(machine.model_run(env))  # required
+        env.process(machine.model_run())  # required
     # run until simulated time 10000
     MaxSimtime = 10000.0
     env.run(until=MaxSimtime)  # required

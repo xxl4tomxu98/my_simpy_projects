@@ -4,7 +4,7 @@ import random
 env = simpy.Environment()
 N = 5
 chopsticks = [simpy.Resource(env, capacity=1) for i in range(N)]
-
+print(chopsticks)
 
 class Philosoper():
     # mean time for thinking
@@ -25,7 +25,7 @@ class Philosoper():
 
     # request resources
     def get_hungry(self):
-        start_waiting = self.env.now()
+        start_waiting = self.env.now
         self.diag("requeted chopstick")
         rq1 = self.chopsticks[0].request()
         yield rq1
@@ -48,7 +48,7 @@ class Philosoper():
             yield self.env.timeout(thinking_delay)
             # suspend main process getting hungry yield all events 
             get_hungry_p = self.env.process(self.get_hungry())
-            rq1, rq2 = yield get_hungry_p
+            rq1, rq2 = (yield get_hungry_p)
             # Eating time is also exponential 
             eating_delay = random.expovariate(1/self.T1)
             # block generator for eating delay time
@@ -62,7 +62,7 @@ class Philosoper():
     # diagosis
     def diag(self, message):
         if self.DIAG:
-            print("P{} {} @{}", self.id, message, self.env.now())  
+            print("P{} {} @{}", self.id, message, self.env.now)  
 
 philosophers = [Philosoper(env, (chopsticks[i], chopsticks[(i+1)%N]), i) for i in range(N)]
 env.run()
