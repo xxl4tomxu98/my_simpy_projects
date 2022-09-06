@@ -1,10 +1,6 @@
 import simpy
 import random
 
-env = simpy.Environment()
-N = 5
-chopsticks = [simpy.Resource(env, capacity=1) for i in range(N)]
-print(chopsticks)
 
 class Philosoper():
     # mean time for thinking
@@ -48,7 +44,7 @@ class Philosoper():
             yield self.env.timeout(thinking_delay)
             # suspend main process getting hungry yield all events 
             get_hungry_p = self.env.process(self.get_hungry())
-            rq1, rq2 = (yield get_hungry_p)
+            rq1, rq2 = yield get_hungry_p
             # Eating time is also exponential 
             eating_delay = random.expovariate(1/self.T1)
             # block generator for eating delay time
@@ -64,5 +60,28 @@ class Philosoper():
         if self.DIAG:
             print("P{} {} @{}", self.id, message, self.env.now)  
 
-philosophers = [Philosoper(env, (chopsticks[i], chopsticks[(i+1)%N]), i) for i in range(N)]
-env.run()
+
+def simulate(n, t):
+    '''
+    Simulate the system of n philosopher for up to t time units
+    and return the average waiting time
+    '''
+    env = simpy.Environment()
+    chopsticks = [simpy.Resource(env, capacity=1) for i in range(n)]
+    philosophers = [Philosoper(env, chopsticks[i], chopsticks[(i+1)%n], i) for i in range(n)]
+    env.run(until=t)
+    return sum(ph.waiting for ph in philosophers)/n
+
+
+import matplotlib.pyplot as plt 
+import matplotlib
+matplotlib.style.use("ggplot")
+# Simulate
+N = 20
+X = range(2, N)
+Y = [simulate(n, 50000) for n in X]
+# Plot
+plt.plot(X, Y, "-o")
+plt.ylabel("Waiting time")
+plt.xlabel("Number of philosopers")
+plt.show()
