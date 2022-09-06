@@ -22,13 +22,13 @@ class Philosoper():
     # request resources
     def get_hungry(self):
         start_waiting = self.env.now
-        self.diag("requeted chopstick")
+        self.diag("requested chopstick")
         rq1 = self.chopsticks[0].request()
         yield rq1
         self.diag("obtained chopstick")
         # block generator DT between 2 chopsticks
         yield self.env.timeout(self.DT)
-        self.diag("requeted another chopstick")
+        self.diag("requested another chopstick")
         rq2 = self.chopsticks[1].request()
         yield rq2
         self.diag("obtained another chopstick")
@@ -55,7 +55,7 @@ class Philosoper():
             self.chopsticks[1].release(rq2)
             self.diag("release the chopsticks")
         
-    # diagosis
+    # diagnosis
     def diag(self, message):
         if self.DIAG:
             print("P{} {} @{}", self.id, message, self.env.now)  
