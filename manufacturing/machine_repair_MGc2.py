@@ -127,7 +127,7 @@ def calc_ICs():
     if (hwic[0]<=abs_err[0]) and (hwic[1]<=abs_err[1]) and (hwic[3]<=abs_err[3]):
         l_end = True
     print('')
-    print(round(hwic,2),abs_err, l_end )
+    print(round(hwic,2), abs_err, l_end )
 
 
 def print_output():
@@ -137,10 +137,9 @@ def print_output():
     fig, ax = plt.subplots(1,1)
     ax.axis('tight')
     ax.axis('off') 
-    output_table = ax.table(cellText = df_output.values,
-                    colLabels = col_labels, rowLabels = row_labels,
-                    rowColours =["skyblue"]*5, colColours =["cyan"]*4,
-                    cellLoc='center', loc="center")
+    output_table = ax.table(cellText=df_output.values, colLabels=col_labels,
+                            rowLabels=row_labels, rowColours=["skyblue"]*5,
+                            colColours=["cyan"]*4, cellLoc='center', loc="center")
     ax.set_title("Output data for %i independent runs" %(run+1),  
                   fontsize=18, y= 0.8 , pad = 4)
     output_table.auto_set_font_size(False)
