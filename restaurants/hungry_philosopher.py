@@ -6,9 +6,9 @@ class Philosoper():
     # mean time for thinking
     T0 = 10
     # mean time for eating
-    T1 = 10
+    T1 = 15
     # time to pick up the other chopstick
-    DT = 1
+    DT = 3
 
     def __init__(self, env, chopsticks, my_id, DIAG=True):        
         self.env = env
