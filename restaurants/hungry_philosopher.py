@@ -58,7 +58,7 @@ class Philosoper():
     # diagnosis
     def diag(self, message):
         if self.DIAG:
-            print("P{} {} @{}", self.id, message, self.env.now)  
+            print('P{} {} @{}', self.id, message, self.env.now)  
 
 
 def simulate(n, t):
@@ -68,7 +68,7 @@ def simulate(n, t):
     '''
     env = simpy.Environment()
     chopsticks = [simpy.Resource(env, capacity=1) for i in range(n)]
-    philosophers = [Philosoper(env, chopsticks[i], chopsticks[(i+1)%n], i) for i in range(n)]
+    philosophers = [Philosoper(env, (chopsticks[i], chopsticks[(i+1)%n]), i) for i in range(n)]
     env.run(until=t)
     return sum(ph.waiting for ph in philosophers)/n
 
