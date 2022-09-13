@@ -10,7 +10,7 @@ class Philosoper():
     # time to pick up the other chopstick
     DT = 1
 
-    def __init__(self, env, chopsticks, my_id, DIAG=False):        
+    def __init__(self, env, chopsticks, my_id, DIAG=True):        
         self.env = env
         self.chopsticks = chopsticks
         self.id = my_id
@@ -58,7 +58,7 @@ class Philosoper():
     # diagnosis
     def diag(self, message):
         if self.DIAG:
-            print('P{} {} @{}', self.id, message, self.env.now)  
+            print(f'P{self.id}, {message}, @{self.env.now}')  
 
 
 def simulate(n, t):
