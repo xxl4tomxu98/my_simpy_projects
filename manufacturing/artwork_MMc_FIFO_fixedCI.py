@@ -98,7 +98,7 @@ def calc_measures():
                         on='Job Number', how='left')
     df_merge = pd.merge(df_merge, df_wk2_reles, 
                         on='Job Number', how='left')
-#.......................................
+    #.......................................
     # Computing measures of performance
     # Average Delay in Queues
     df_merge['Delay Wk1'] = df_merge['Job Time Op1'] - df_merge['Job Time Sc1']
@@ -120,7 +120,7 @@ def calc_measures():
     utilization_wk2 = round((1 - wk2_sum_idle / stop_arrivals) * 100, 2)
     print('The utlization of the workstation 1 is %.2f%%'  % (utilization_wk1))
     print('The utlization of the workstation 2 is %.2f%%'  % (utilization_wk2))
-#...............................................
+    #...............................................
     # Time weighted average of the queue length 
     df_l1 = pd.DataFrame(workstation1_length_list, columns = ['len'])
     df_t1 = pd.DataFrame(workstation1_timeth_list, columns = ['time'])
@@ -129,10 +129,9 @@ def calc_measures():
     df_qlength1['delta_time'] = df_qlength1['time'].shift(-1) - df_qlength1['time']
     # drop the last row because it would have an infinite time span
     df_qlength1 = df_qlength1[0:-1]
-    len_avg_wk1 = np.average(df_qlength1['len'], 
-                             weights = df_qlength1['delta_time'])
+    len_avg_wk1 = np.average(df_qlength1['len'], weights = df_qlength1['delta_time'])
     print('The time weighted length of the workstation 1 is %.2f' % (len_avg_wk1))
-#.....................................................
+    #.....................................................
     # list and dataframe for final output
     listoflists = []
     listoflists.append(round(mean_delay_wk1,2))
@@ -162,7 +161,7 @@ def print_output():
     plt.savefig('./' +'twoWKs_perf_measures_fixedCI.png',
                 bbox_inches='tight', dpi=150)
     plt.show()
-#.....................................................
+    #.....................................................
     ## confidence intervals
     mean = round(df.mean(),2)  
     sigma= round(df.std(ddof=1),2)
@@ -196,21 +195,21 @@ def print_output():
 
 numb_of_runs = 10
 seed_value = 2345
-prbnumgen  = RandomState(seed_value)
+prbnumgen = RandomState(seed_value)
 hours_run_sim = 30 * 24
 stop_arrivals = 400            ## for the verification step
 for run in range(10):
     workstation1_schedule_list, workstation2_schedule_list = [],[]
     workstation1_operation_list,workstation2_operation_list= [],[]
-    workstation1_release_list,  workstation2_release_list  = [],[]
+    workstation1_release_list, workstation2_release_list  = [],[]
     time_workstation1_schedule_list, time_workstation2_schedule_list  = [],[]    
     time_workstation1_operation_list,time_workstation2_operation_list = [],[]
-    time_workstation1_release_list,  time_workstation2_release_list   = [],[]
+    time_workstation1_release_list, time_workstation2_release_list   = [],[]
     workstation1_length_list, workstation1_utilization_list = [],[]
     workstation1_timeth_list, workstation2_utilization_list = [],[]
-    mean_delay_wk1,  mean_delay_wk2  = [],[]
+    mean_delay_wk1, mean_delay_wk2  = [],[]
     utilization_wk1, utilization_wk2 = [],[]
-    len_avg_wk1,     len_avg_wk2     = [],[]
+    len_avg_wk1, len_avg_wk2 = [],[]
     listoflists = []
     df_wk1_schdl = pd.DataFrame(columns = ['Job Number', 'Job Time Sc1'])
     df_wk2_schdl = pd.DataFrame(columns = ['Job Number', 'Job Time Sc2'])

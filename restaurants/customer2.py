@@ -53,3 +53,4 @@ def customer_generator():
 
 
 customer_generator_p = env.process(customer_generator())
+env.run()

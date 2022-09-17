@@ -103,8 +103,8 @@ def calc_measures():
     print(' ')
     print('The average delay in queue for workstation 1 is %.2f hours'  % (mean_delay_wk1))
     print('The average delay in queue for workstation 2 is %.2f hours'  % (mean_delay_wk2))
-#............................................
-# Utilization of the Servers
+    #............................................
+    # Utilization of the Servers
     for i in range(0, len(df_merge)-1):
          workstation1_utilization_list.append(df_merge['Job Time Op1'][i+1] - df_merge['Job Time Rl1'][i])
          workstation2_utilization_list.append(df_merge['Job Time Op2'][i+1] - df_merge['Job Time Rl2'][i])
@@ -115,23 +115,23 @@ def calc_measures():
     print(' ')
     print('The utilization of the workstation 1 is %.2f%%'  % (utilization_wk1))
     print('The utilization of the workstation 2 is %.2f%%'  % (utilization_wk2))
-#...............................................
-# Time weighted average of the queue length
+    #...............................................
+    # Time weighted average of the queue length
     df_l1 = pd.DataFrame(workstation1_length_list, 
                          columns = ['len'])
     df_t1 = pd.DataFrame(workstation1_timeth_list,
                          columns = ['time'])
     df_qlength1 = pd.concat([df_l1, df_t1], axis = 1)
-# use the next row to figure out how long the queue was at that length
+    # use the next row to figure out how long the queue was at that length
     df_qlength1['delta_time'] = df_qlength1['time'].shift(-1) - df_qlength1['time']
-# drop the last row because it would have an infinite time span
+    # drop the last row because it would have an infinite time span
     df_qlength1 = df_qlength1[0:-1]
     len_avg_wk1 = np.average(df_qlength1['len'],
                              weights = df_qlength1['delta_time'])
     print(' ')
     print('The time weighted length of the workstation 1 is %.2f'  % (len_avg_wk1))
-#.....................................................
-# list and dataframe for final output
+    #.....................................................
+    # list and dataframe for final output
     listoflists = []
     listoflists.append(round(mean_delay_wk1,2))
     listoflists.append(round(mean_delay_wk2,2))
@@ -177,8 +177,7 @@ def print_output():
     runs_table.set_fontsize(8)
     plt.savefig('./' +'twoWKs_perf_measures_sequentialCI.png',
                 bbox_inches='tight', dpi=150)
-    plt.show()
-#.....................................................
+    plt.show()    
     # Output Data Table
     col_labels = ["Mean", "Std. Dev.", "Lower bound", "Upper Bound"]
     row_labels = ["Delay WK1 (h)","Delay WK2 (h)",
