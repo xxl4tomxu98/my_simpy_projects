@@ -48,8 +48,8 @@ class Inventory:
 
     def __init__(self, env):
         self.env = env
-        self.BU_inv = simpy.Container(env, init = P.ROP_BU)
-        self.DR_inv = simpy.Container(env, init = P.ROP_DR) 
+        self.BU_inv = simpy.Container(env, init=P.ROP_BU)
+        self.DR_inv = simpy.Container(env, init=P.ROP_DR) 
         self.mon_procBU = env.process(self.monitor_BU_inv(env)) 
         self.mon_procDR = env.process(self.monitor_DR_inv(env))
 
@@ -92,7 +92,7 @@ class DRCustomer(object):
         yield self.env.timeout(P.LT_2)
         yield S.Inv.DR_inv.put(P.DRorderLotSize)
 
-    def ordertoDR(self ):
+    def ordertoDR(self):
         startTime_DR = self.env.now
         j = math.floor(self.env.now)
         S.DR_Dem_day[j] += 1
@@ -166,8 +166,8 @@ def main():
     DR = DROrderProcessor(envr, DRlambda = P.externalToDRMean)
     S.Inv = Inventory(envr)
     envr.run(until = P.simulationTimeMax)
-    return S.DRwaits, S.BUwaits, S.BU_Dem_day, S.DR_Dem_day, S.nBUCustomers, S.nDRCustomers
+    print(S.DRwaits, S.BUwaits, S.BU_Dem_day, S.DR_Dem_day, S.nBUCustomers, S.nDRCustomers)
 
 
 if __name__ == '__main__':
-    main() 
+    main()
