@@ -25,6 +25,7 @@ class MachineClass(object):
         env.process.__init__(self)
         self.env = env
         self.RepairPerson = RepairPerson
+        self.ctrl_passivate=env.event()
         self.StartUpTime = None # time the current up period started
         self.ID = MachineClass.NextID # ID for this MachineClass object
         MachineClass.NextID += 1
@@ -40,12 +41,11 @@ class MachineClass(object):
             MachineClass.NUp -= 1
             # if only one machine down, then wait for the other to go down
             if MachineClass.NUp == 1:
-                yield passivate,self
+                yield self.ctrl_passivate
             # here is the case in which we are the second machine down;
             # either (a) the other machine was waiting for this machine to
-            # go down, or (b) the other machine is in the process of being
-            # repaired
-            elif G.RepairPerson.capacity == 1:
+            # go down, or (b) the other machine is in the process of being repaired
+            elif self.RepairPerson.capacity == 1:
                 reactivate(MachineClass.MachineList[1-self.ID])
                 # now go to repair
                 yield self.RepairPerson.request()
