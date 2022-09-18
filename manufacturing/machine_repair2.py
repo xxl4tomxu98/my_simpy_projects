@@ -15,8 +15,6 @@ from random import Random, expovariate, uniform
 
 class G: # globals    
     Rnd = Random(12345)
-    # create the repairperson
-    RepairPerson = simpy.Resource(1)
 
 
 class MachineClass(object):
@@ -26,14 +24,14 @@ class MachineClass(object):
     # started repair service right away
     UpRate = 1/1.0 # breakdown rate
     RepairRate = 1/0.5 # repair rate
-    # the following two variables are not actually used, but are useful
-    # for debugging purposes
+    # following two variables are not actually used, but are useful for debugging purposes
     NextID = 0 # next available ID number for MachineClass objects
     NUp = 0 # number of machines currently up
 
-    def __init__(self, env):
+    def __init__(self, env, RepairPerson):
         env.process.__init__(self)
         self.env = env
+        self.RepairPerson = RepairPerson
         self.StartUpTime = 0.0 # time the current up period stated
         self.ID = MachineClass.NextID # ID for this MachineClass object
         MachineClass.NextID += 1
@@ -47,21 +45,23 @@ class MachineClass(object):
             # update number of breakdowns
             MachineClass.NRep += 1
             # check whether we get repair service immediately
-            if G.RepairPerson.n == 1:
+            if self.RepairPerson.capacity == 1:
                 MachineClass.NImmedRep += 1
             # need to request, and possibly queue for, the repairperson
-            yield G.RepairPerson.request()
+            yield self.RepairPerson.request()
             # OK, we’ve obtained access to the repairperson; now hold for repair time
             yield self.env.timeout(G.Rnd.expovariate(MachineClass.RepairRate))
             # repair done, release the repairperson
-            yield G.RepairPerson.release()
+            yield self.RepairPerson.release(self.RepairPerson.request())
 
 
 def main():
     env = simpy.Environment() 
+    # create the repairperson
+    RepairPerson = simpy.Resource(env, capacity=1)
     # set up the two machine processes
     for I in range(2):
-        machine = MachineClass(env)
+        machine = MachineClass(env, RepairPerson)
         env.process(machine.model_run())   
     MaxSimtime = 10000.0
     env.run(until=MaxSimtime)

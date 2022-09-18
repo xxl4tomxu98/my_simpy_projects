@@ -34,30 +34,25 @@ def machine_failure(env, number_repair):
     failure_number = 0
     while True:
         ## exponential distribution for failures
-        next_failure = expon.rvs(scale = MACHINE_FAILURE_MEAN, 
-                                 size = 1)
+        next_failure = expon.rvs(scale=MACHINE_FAILURE_MEAN, size=1)
         # Wait for the failure
         yield env.timeout(next_failure)
         time_of_failure = env.now
         failures.append(time_of_failure)
         failure_number += 1
-        print('failure %3d occurs at %.2f' % 
-             (failure_number, env.now))
-        env.process(repairing(env, number_repair, 
-                    failure_number, time_of_failure))
+        print('failure %3d occurs at %.2f' %(failure_number, env.now))
+        env.process(repairing(env, number_repair, failure_number, time_of_failure))
 
 #...................................................................
 def repairing(env, number_repair, failure_number, time_of_failure):
     with repair_persons.request() as req:
-        print('%3d enters the queue at %.2f' % 
-              (failure_number, env.now))         
+        print('%3d enters the queue at %.2f' %(failure_number, env.now))         
         queue_in = env.now
         length = len(repair_persons.queue)
         tme_in_queue.append(queue_in)
         len_in_queue.append(length)
         yield req
-        print('%3d leaves the queue at %.2f' % 
-              (failure_number, env.now)) 
+        print('%3d leaves the queue at %.2f' %(failure_number, env.now)) 
         queue_out = env.now
         length = len(repair_persons.queue)
         tme_in_queue.append(queue_out)
@@ -72,8 +67,7 @@ def repairing(env, number_repair, failure_number, time_of_failure):
                 time_service = df_service.loc[i, 'minutes']
                 break
         yield env.timeout(time_service)
-        print('%3d stays at service %.2f' %
-              (failure_number,time_service))
+        print('%3d stays at service %.2f' %(failure_number,time_service))
         time_repaired = env.now
         repaired.append(time_repaired)
         time_out_system = time_repaired - time_of_failure
@@ -107,8 +101,7 @@ def calc_averages():
     avg_out_system.insert(altern, np.mean(out_system))
     avg_in_service.insert(altern, np.mean(in_service))
     print('Alternative number: %1d' %(altern+1))
-    print('The average delay in queue is %.2f' % 
-           (avg_delay[altern]))
+    print('The average delay in queue is %.2f' %(avg_delay[altern]))
     print('The average number of machines in queue is %.2f' % 
            (avg_length[altern]))
     print('The average time machines out of system is %.2f' % 
@@ -148,7 +141,7 @@ for altern in range(5):
     tme_in_queue, len_in_queue = [],[]
     env = simpy.Environment() 
     NUMBER_REPAIR_PERSONS = altern + 1
-    repair_persons = simpy.Resource(env, capacity = NUMBER_REPAIR_PERSONS)
+    repair_persons = simpy.Resource(env, capacity=NUMBER_REPAIR_PERSONS)
     env.process(machine_failure(env, repair_persons))
     env.run(until = SIM_TIME)
     calc_averages()
