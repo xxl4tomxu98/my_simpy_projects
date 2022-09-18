@@ -64,21 +64,18 @@ class Bootstrap(object):
 
         yield self.env.timeout(1)
 
+
 def main():
-
     name = 'Sioux Falls Network'
-
     ########################
     # bootstrap parameters #
     ########################
     boot = 5
-
     #################################
     # initialize discrete event env #
     #################################
     env = simpy.Environment()  # use instant simulation
     # env = simpy.rt.RealtimeEnvironment(factor=1.)  # use real time simulation
-
     # setup simulation processes
     bsProcess = []
     for b in range(boot):
@@ -87,44 +84,33 @@ def main():
         bsProcess.append(bs)
 
     start_time = timeit.default_timer() # start simulation timer
-
     env.run()
-
     end_time = timeit.default_timer() # end simulation timer
-
     # compile simulation statistics
     bsTable = None
     for n, bootstrap in enumerate(bsProcess):
         df = pd.DataFrame(sorted(bootstrap.sim.data, key=lambda x: x[3]),
                           columns=['carID', 'link', 'event',
                                    'time', 'queue', 't_queue'])
-
         meanQlength = df.loc[df['event'] == 'departure'][
             ['link', 'queue']].groupby(['link']).mean()
         meanQlength.columns=['mean']
-
         varQlength = df.loc[df['event'] == 'departure'][
             ['link', 'queue']].groupby(['link']).var()
         varQlength.columns=['variance']
-
         maxQlength = df.loc[df['event'] == 'departure'][
             ['link', 'queue']].groupby(['link']).max()
         maxQlength.columns=['max']
-
         if bsTable is None:
             bsTable = maxQlength
             bsTable.columns = [1]
-
         else:
             bsTable[n+1] = maxQlength
-
     mean = bsTable.mean(axis=1)
     mse = bsTable.var(axis=1, ddof=0)
     bsTable['mean'] = mean
     bsTable['MSE'] = mse
-
     print('Simulation runtime: %.3fs' % (end_time-start_time))
-
     with pd.option_context('expand_frame_repr', False):
         print(bsTable)
 

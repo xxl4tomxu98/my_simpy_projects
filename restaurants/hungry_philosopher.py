@@ -5,7 +5,6 @@ import random
 class Chef():
     # mean time for cooking for replenishing
     T2 = 150
-
     def __init__(self, env, bowl):
         self.env = env
         self.bowl = bowl

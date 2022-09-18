@@ -8,6 +8,7 @@ from statistics import *
 
 plt.style.use('ggplot')
 
+
 def road():
     env = simpy.Environment()
     # env = simpy.rt.RealtimeEnvironment(factor=0.8)
@@ -23,22 +24,17 @@ def road():
         MU=1,
         coordinates=c
     )
-
     # draw link on map
     sim.networkLines.append(c)
-
     # initialize car generation
     env.process(sim.source(10, LAMBDA=1, linkid=1))
-
     # draw initial network
     for i in sim.networkLines:
         cv2.line(sim.img, (int(i[0][0]), int(i[0][1])), (int(i[1][0]), int(i[1][1])), (255, 255, 255), 3)
     name = 'Single Road'
     cv2.imshow(name, sim.img)
-
     # start visualization update process
     env.process(sim.visualization(frequency=0.2, name=name))
-
     # wait for keypress to start simulation
     print('press space to start')
     k = cv2.waitKey(0)
@@ -46,9 +42,9 @@ def road():
         sys.exit()
     # run simulation
     env.run()
-
     print('Press any key to exit')
     cv2.waitKey(0)
+
 
 if __name__ == '__main__':
     road()
